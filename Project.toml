@@ -1,0 +1,7 @@
+name = "Preallocator"
+uuid = "71b2d670-90dc-11e9-1d0d-815d5cda8fda"
+authors = ["marius <mariusmillea@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Cassette = "7057c7e9-c182-5462-911a-8362d720325c"
