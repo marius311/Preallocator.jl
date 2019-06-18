@@ -37,7 +37,7 @@ Uses the preallocated memory cache `mem` to run `<expression>`. See
 macro preallocated(mem, ex)
     quote
         mem = rewind($(esc(mem)))
-        Cassette.overdub(PreallocatedCtx(metadata=mem), ()->$(esc(ex)))
+        ans = Cassette.overdub(PreallocatedCtx(metadata=mem), ()->$(esc(ex)))
         if mem.debug
             @info @sprintf("""
             @preallocate
@@ -50,6 +50,7 @@ macro preallocated(mem, ex)
             mem.cache_misses,
             100 * mem.cache_misses / (total+mem.cache_misses))
         end
+        return ans
     end
 end
 
