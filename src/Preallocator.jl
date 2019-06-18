@@ -8,10 +8,12 @@ export @preallocate, @preallocated
 """
     mem = @preallocate <expression> [debug=true/false]
     
-Runs `<expression>` and monitors any Arrays which are allocated while running
-this code. Returns a list `mem` of these arrays, which can then be used in a
-subsequent call to `@preallocated mem <expression>` which makes it so that the same
-memory is used again rather than being reallocated.
+Runs `<expression>` and traces any Arrays which are allocated while running this
+code. Returns a memory cache `mem`, which can then be used in a subsequent call
+to `@preallocated mem <expression>` which reuses the same memory for these
+Arrays rather than reallocating it.
+
+`debug=true` prints some useful debugging info.
 """
 macro preallocate(ex, debug=false)
     if debug != false
@@ -29,7 +31,8 @@ end
 """
     @preallocated mem <expression>
     
-Uses the preallocated memory `mem` to run `<expression>`. See `@preallocate`.
+Uses the preallocated memory cache `mem` to run `<expression>`. See
+`@preallocate`.
 """
 macro preallocated(mem, ex)
     quote
@@ -38,10 +41,14 @@ macro preallocated(mem, ex)
         if mem.debug
             @info @sprintf("""
             @preallocate
-            Total arrays used: %i of %i
-            Total cache misses: %i
+            Total arrays used: %i of %i (%.1f%%)
+            Total cache misses: %i (%.1f%%)
             """, 
-            max(length(mem.allocated_arrays),mem.next_index-1), length(mem.allocated_arrays), mem.cache_misses)
+            (used=max(length(mem.allocated_arrays),mem.next_index-1)), 
+            (total=length(mem.allocated_arrays)),
+            100 * used/total,
+            mem.cache_misses,
+            100 * mem.cache_misses / (total+mem.cache_misses))
         end
     end
 end
